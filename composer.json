@@ -1,5 +1,5 @@
 {
-    "name": "dxi/doctrine-extension",
+    "name": "max4d009/doctrine-extension",
     "type": "library",
     "description": "DXI Doctrine Extensions",
     "keywords": ["enum", "doctrine", "mapping", "orm", "odm", "php-enum"],
