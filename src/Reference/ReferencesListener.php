@@ -52,6 +52,7 @@ class ReferencesListener extends MappedEventSubscriber
         $object = $ea->getObject();
         $meta = $om->getClassMetadata(get_class($object));
         $config = $this->getConfiguration($om, $meta->name);
+        if(isset($config['referenceOne']))
         foreach ($config['referenceOne'] as $mapping) {
             $property = $meta->reflClass->getProperty($mapping['field']);
             $property->setAccessible(true);
