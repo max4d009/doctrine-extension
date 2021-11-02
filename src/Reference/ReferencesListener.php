@@ -73,6 +73,7 @@ class ReferencesListener extends MappedEventSubscriber
             }
         }
 
+        if(isset($config['referenceMany']))
         foreach ($config['referenceMany'] as $mapping) {
             $property = $meta->reflClass->getProperty($mapping['field']);
             $property->setAccessible(true);
