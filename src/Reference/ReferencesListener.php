@@ -174,50 +174,51 @@ class ReferencesListener extends MappedEventSubscriber
         $object = $ea->getObject();
         $meta = $om->getClassMetadata(get_class($object));
         $config = $this->getConfiguration($om, $meta->name);
-        foreach ($config['referenceOne'] as $mapping) {
-            if (isset($mapping['identifier'])) {
-                $property = $meta->reflClass->getProperty($mapping['field']);
-                $property->setAccessible(true);
-                $referencedObject = $property->getValue($object);
-                if (! is_object($referencedObject)) {
-                    continue;
-                }
+        if(isset($config['referenceOne']))
+            foreach ($config['referenceOne'] as $mapping) {
+                if (isset($mapping['identifier'])) {
+                    $property = $meta->reflClass->getProperty($mapping['field']);
+                    $property->setAccessible(true);
+                    $referencedObject = $property->getValue($object);
+                    if (! is_object($referencedObject)) {
+                        continue;
+                    }
 
-                $identifierFields = explode(',', $mapping['identifier']);
-                if (count($identifierFields) == 1) {
-                    $meta->setFieldValue(
-                        $object,
-                        $mapping['identifier'],
-                        $this->getIdentifier($ea, $mapping, $referencedObject)
-                    );
-                    continue;
-                }
-
-                // composite key reference
-                $id = $this->getIdentifier($ea, $mapping, $referencedObject, false);
-
-                foreach($identifierFields as $idField) {
-                    if ($meta->hasField($idField)) {
+                    $identifierFields = explode(',', $mapping['identifier']);
+                    if (count($identifierFields) == 1) {
                         $meta->setFieldValue(
                             $object,
-                            $idField,
-                            $id[$idField]
+                            $mapping['identifier'],
+                            $this->getIdentifier($ea, $mapping, $referencedObject)
                         );
-                    } else {
-                        $referenceDefinition = $this->getReferenceDefinition($config, $idField);
-                        $referenceIdField = $referenceDefinition['identifier'];
+                        continue;
+                    }
 
-                        $referencedObjectProperty = $meta->getReflectionClass()->getProperty($referenceDefinition['field']);
-                        $referencedObjectProperty->setAccessible(true);
+                    // composite key reference
+                    $id = $this->getIdentifier($ea, $mapping, $referencedObject, false);
 
-                        $referencedObject = $referencedObjectProperty->getValue($object);
-                        $referencedObjectId = $referencedObject ? $this->getIdentifier($ea, $referenceDefinition, $referencedObject, true) : null;
+                    foreach($identifierFields as $idField) {
+                        if ($meta->hasField($idField)) {
+                            $meta->setFieldValue(
+                                $object,
+                                $idField,
+                                $id[$idField]
+                            );
+                        } else {
+                            $referenceDefinition = $this->getReferenceDefinition($config, $idField);
+                            $referenceIdField = $referenceDefinition['identifier'];
 
-                        $meta->setFieldValue($object, $referenceIdField, $referencedObjectId);
+                            $referencedObjectProperty = $meta->getReflectionClass()->getProperty($referenceDefinition['field']);
+                            $referencedObjectProperty->setAccessible(true);
+
+                            $referencedObject = $referencedObjectProperty->getValue($object);
+                            $referencedObjectId = $referencedObject ? $this->getIdentifier($ea, $referenceDefinition, $referencedObject, true) : null;
+
+                            $meta->setFieldValue($object, $referenceIdField, $referencedObjectId);
+                        }
                     }
                 }
             }
-        }
         $this->updateManyEmbedReferences($eventArgs);
     }
 
