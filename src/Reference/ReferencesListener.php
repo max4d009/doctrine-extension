@@ -230,6 +230,7 @@ class ReferencesListener extends MappedEventSubscriber
         $meta = $om->getClassMetadata(get_class($object));
         $config = $this->getConfiguration($om, $meta->name);
 
+        if($config['referenceManyEmbed'])
         foreach ($config['referenceManyEmbed'] as $mapping) {
             $property = $meta->reflClass->getProperty($mapping['field']);
             $property->setAccessible(true);
